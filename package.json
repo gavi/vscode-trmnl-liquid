@@ -17,6 +17,7 @@
     "url": "https://github.com/gavi/vscode-trmnl-liquid/issues"
   },
   "homepage": "https://github.com/gavi/vscode-trmnl-liquid#readme",
+  "icon": "media/icon.png",
   "keywords": [
     "trmnl",
     "liquid",
@@ -37,7 +38,8 @@
       {
         "command": "trmnl.openPreview",
         "title": "TRMNL: Open Preview",
-        "category": "TRMNL"
+        "category": "TRMNL",
+        "icon": "$(open-preview)"
       },
       {
         "command": "trmnl.setLayout",
