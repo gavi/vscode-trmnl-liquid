@@ -1,0 +1,51 @@
+{% assign reg = rows | where: "fuel", "unleaded" | first %}
+
+<div class="layout layout--col gap--distribute">
+  <div class="grid">
+    <div class="item">
+      <div class="meta"></div>
+      <div class="content">
+        <span class="value value--large value--tnums" data-value-fit="true">${{ reg.state }}</span>
+        <span class="label">Regular · {{ state }}</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="divider"></div>
+
+  <div class="grid gap--[9px]">
+    <div class="item col--span-7">
+      <div class="meta"></div>
+      <div class="content">
+        <span class="value value--tnums" data-value-fit="true">${{ reg.national }}</span>
+        <span class="label">US avg</span>
+      </div>
+    </div>
+
+    <div class="col col--span-5 gap--small">
+      <div class="item">
+        <div class="meta"></div>
+        <div class="content flex flex--row flex--left gap--small">
+          <span class="value value--tnums value--xsmall">{% if reg.diff >= 0 %}+{% endif %}${{ reg.diff }}</span>
+          <span class="label">vs US</span>
+        </div>
+      </div>
+
+      <div class="divider"></div>
+
+      <div class="item">
+        <div class="meta"></div>
+        <div class="content flex flex--row flex--left gap--small">
+          <span class="value value--tnums value--xsmall">${{ reg.state_year_ago }}</span>
+          <span class="label">1y ago</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="title_bar">
+  <img class="image" src="https://usetrmnl.com/images/plugins/trmnl--render.svg">
+  <span class="title">{{ trmnl.plugin_settings.instance_name }}</span>
+  <span class="instance">{{ state }}</span>
+</div>

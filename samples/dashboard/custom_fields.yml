@@ -1,0 +1,23 @@
+# TRMNL Private Plugin → Custom Fields
+# Paste this into the "Custom Fields" YAML section in the plugin editor.
+# Then set the Polling URL to:
+#   https://api.liu.edu/trmnl
+# and add a Polling Header:
+#   X-API-Key: {{ api_key }}
+
+- keyname: about
+  name: About This Plugin
+  field_type: author_bio
+  category: business,education
+  description: |
+    LIU enrollment summary for the current Fall term, sourced from the LIU
+    Dashboard Oracle warehouse. Shows total headcount and credits along
+    with the percentage change vs. the prior Fall term, plus a
+    per-career (UGRD/GRAD/PROF/VETM/DUAL) breakdown on the full layout.
+  email_address: gavi.narra@liu.edu
+
+- keyname: api_key
+  field_type: string
+  name: API Key
+  description: Shared secret issued by the dashb-trmnl service (sent as X-API-Key)
+  optional: false

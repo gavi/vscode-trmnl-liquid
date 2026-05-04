@@ -1,0 +1,98 @@
+{
+  "name": "trmnl-liquid",
+  "displayName": "TRMNL Liquid",
+  "description": "Live preview for TRMNL plugin Liquid templates — render .liquid files at correct device dimensions with mock data.",
+  "version": "0.0.1",
+  "publisher": "gavi",
+  "author": {
+    "name": "Gavi Narra",
+    "email": "gavi.narra@objectgraph.com"
+  },
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/gavi/vscode-trmnl-liquid.git"
+  },
+  "bugs": {
+    "url": "https://github.com/gavi/vscode-trmnl-liquid/issues"
+  },
+  "homepage": "https://github.com/gavi/vscode-trmnl-liquid#readme",
+  "keywords": [
+    "trmnl",
+    "liquid",
+    "epaper",
+    "preview"
+  ],
+  "engines": {
+    "vscode": "^1.85.0"
+  },
+  "categories": [
+    "Visualization",
+    "Programming Languages"
+  ],
+  "activationEvents": [],
+  "main": "./dist/extension.js",
+  "contributes": {
+    "commands": [
+      {
+        "command": "trmnl.openPreview",
+        "title": "TRMNL: Open Preview",
+        "category": "TRMNL"
+      },
+      {
+        "command": "trmnl.setLayout",
+        "title": "TRMNL: Set Preview Layout",
+        "category": "TRMNL"
+      },
+      {
+        "command": "trmnl.setDevice",
+        "title": "TRMNL: Set Preview Device",
+        "category": "TRMNL"
+      },
+      {
+        "command": "trmnl.togglePortrait",
+        "title": "TRMNL: Toggle Portrait Orientation",
+        "category": "TRMNL"
+      }
+    ],
+    "menus": {
+      "editor/title": [
+        {
+          "command": "trmnl.openPreview",
+          "when": "resourceExtname == .liquid",
+          "group": "navigation"
+        }
+      ]
+    },
+    "languages": [
+      {
+        "id": "liquid",
+        "aliases": [
+          "Liquid",
+          "liquid"
+        ],
+        "extensions": [
+          ".liquid"
+        ],
+        "configuration": "./language-configuration.json"
+      }
+    ]
+  },
+  "scripts": {
+    "build": "node esbuild.js",
+    "watch": "node esbuild.js --watch",
+    "vscode:prepublish": "npm run build"
+  },
+  "devDependencies": {
+    "@types/js-yaml": "^4.0.9",
+    "@types/node": "^20.11.0",
+    "@types/vscode": "^1.85.0",
+    "esbuild": "^0.20.0",
+    "tsx": "^4.7.0",
+    "typescript": "^5.3.0"
+  },
+  "dependencies": {
+    "js-yaml": "^4.1.1",
+    "liquidjs": "^10.25.7"
+  }
+}

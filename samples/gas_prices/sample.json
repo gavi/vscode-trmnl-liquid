@@ -1,0 +1,15 @@
+{
+  "state": "NY",
+  "fetched_at": 1762272000,
+  "rows": [
+    { "fuel": "unleaded", "state": 3.42, "national": 3.18, "diff": 0.24,  "state_year_ago": 3.61, "national_year_ago": 3.30 },
+    { "fuel": "midgrade", "state": 3.86, "national": 3.62, "diff": 0.24,  "state_year_ago": 4.04, "national_year_ago": 3.74 },
+    { "fuel": "premium",  "state": 4.21, "national": 3.97, "diff": 0.24,  "state_year_ago": 4.39, "national_year_ago": 4.09 },
+    { "fuel": "diesel",   "state": 3.74, "national": 3.69, "diff": 0.05,  "state_year_ago": 3.95, "national_year_ago": 3.86 }
+  ],
+  "trmnl": {
+    "plugin_settings": {
+      "instance_name": "AAA Gas Prices"
+    }
+  }
+}

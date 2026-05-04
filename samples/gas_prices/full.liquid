@@ -1,0 +1,80 @@
+{% assign reg = rows | where: "fuel", "unleaded" | first %}
+{% assign mid = rows | where: "fuel", "midgrade" | first %}
+{% assign prem = rows | where: "fuel", "premium" | first %}
+{% assign diesel = rows | where: "fuel", "diesel" | first %}
+
+<div class="layout layout--col gap--distribute">
+  <div class="grid">
+    <div class="item">
+      <div class="meta"></div>
+      <div class="content">
+        <span class="value value--xxxlarge lg:value--giga value--tnums" data-value-format="true">${{ reg.state }}</span>
+        <span class="label">Regular Unleaded — {{ state }}</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="divider"></div>
+
+  <div class="grid">
+    <div class="item col--span-6">
+      <div class="meta"></div>
+      <div class="content">
+        <span class="value value--tnums value--xxlarge lg:value--xxxlarge" data-value-fit="true">${{ reg.national }}</span>
+        <span class="label">US National Average</span>
+      </div>
+    </div>
+
+    <div class="col col--span-3 gap--medium">
+      <div class="item">
+        <div class="meta"></div>
+        <div class="content">
+          <span class="value value--tnums">{% if reg.diff >= 0 %}+{% endif %}${{ reg.diff }}</span>
+          <span class="label">{{ state }} vs US</span>
+        </div>
+      </div>
+
+      <div class="divider"></div>
+
+      <div class="item">
+        <div class="meta"></div>
+        <div class="content">
+          <span class="value value--tnums">${{ reg.state_year_ago }}</span>
+          <span class="label">{{ state }} 1 year ago</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="divider"></div>
+
+  <div class="grid grid--cols-3">
+    <div class="item">
+      <div class="meta"></div>
+      <div class="content">
+        <span class="value value--large lg:value--xlarge value--tnums" data-value-fit="true">${{ mid.state }}</span>
+        <span class="label">Mid-Grade · US ${{ mid.national }}</span>
+      </div>
+    </div>
+    <div class="item">
+      <div class="meta"></div>
+      <div class="content">
+        <span class="value value--large lg:value--xlarge value--tnums" data-value-fit="true">${{ prem.state }}</span>
+        <span class="label">Premium · US ${{ prem.national }}</span>
+      </div>
+    </div>
+    <div class="item">
+      <div class="meta"></div>
+      <div class="content">
+        <span class="value value--large lg:value--xlarge value--tnums" data-value-fit="true">${{ diesel.state }}</span>
+        <span class="label">Diesel · US ${{ diesel.national }}</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="title_bar">
+  <img class="image" src="https://usetrmnl.com/images/plugins/trmnl--render.svg">
+  <span class="title">{{ trmnl.plugin_settings.instance_name }}</span>
+  <span class="instance">{{ state }} · AAA</span>
+</div>
