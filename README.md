@@ -1,6 +1,12 @@
 # TRMNL Liquid
 
+[![VS Marketplace Version](https://img.shields.io/visual-studio-marketplace/v/objectgraph-llc.trmnl-liquid?label=VS%20Marketplace)](https://marketplace.visualstudio.com/items?itemName=objectgraph-llc.trmnl-liquid)
+[![VS Marketplace Installs](https://img.shields.io/visual-studio-marketplace/i/objectgraph-llc.trmnl-liquid)](https://marketplace.visualstudio.com/items?itemName=objectgraph-llc.trmnl-liquid)
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
+
 A VSCode extension for authoring [TRMNL](https://usetrmnl.com) plugin templates locally — render `.liquid` files with mock data in a live webview at the right device dimensions, instead of round-tripping through the web editor.
+
+**Install:** open Extensions sidebar → search "TRMNL Liquid", or run `code --install-extension objectgraph-llc.trmnl-liquid`.
 
 ## Features
 
