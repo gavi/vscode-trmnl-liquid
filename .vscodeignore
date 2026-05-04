@@ -4,8 +4,13 @@ scripts/**
 docs/**
 samples/**
 node_modules/**
+.git/**
 .gitignore
+.gitattributes
+CLAUDE.md
 tsconfig.json
 esbuild.js
-*.map
+package-lock.json
+*.vsix
+**/*.map
 **/*.ts
