@@ -83,6 +83,37 @@ npm run watch           # rebuild on change
 
 Press **F5** in VSCode (with this folder open) to launch the Extension Development Host pre-opened to `samples/gas_prices`.
 
+### Releasing a new version to the Marketplace
+
+One-time setup (already done): `npx @vscode/vsce login objectgraph-llc` — paste the Azure DevOps PAT once; vsce caches it.
+
+Each release:
+
+```sh
+# 1. Make code changes; test in dev host (F5).
+
+# 2. Bump version (auto-commits and tags):
+npm version patch       # 0.0.1 → 0.0.2 (bug fixes)
+# npm version minor     # 0.0.x → 0.1.0 (new features)
+# npm version major     # 0.x.x → 1.0.0 (breaking)
+
+# 3. Build + publish to Marketplace:
+npx @vscode/vsce publish
+
+# 4. Mirror code + tag to GitHub:
+git push && git push --tags
+```
+
+Listing updates at https://marketplace.visualstudio.com/items?itemName=objectgraph-llc.trmnl-liquid within ~5 minutes.
+
+To ship to **Open VSX** (used by Cursor / VSCodium / Windsurf) too — first time, get a token at https://open-vsx.org/user-settings/tokens, then:
+
+```sh
+npx ovsx publish trmnl-liquid-<version>.vsix -p <open-vsx-token>
+```
+
+(You can omit Open VSX entirely; users on those editors can still sideload by downloading the `.vsix` from GitHub releases.)
+
 ### Re-vendoring framework CSS
 
 `media/plugins.css` is fetched from `https://usetrmnl.com/css/latest/plugins.css`. Asset URLs (`url(/fonts/...)`, `url(/images/...)`) are rewritten in-place from `usetrmnl.com` → `trmnl.com` because the upstream paths 301-redirect and the webview CSP blocks the redirect target. If you re-vendor, re-run:

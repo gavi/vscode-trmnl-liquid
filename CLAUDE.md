@@ -71,5 +71,6 @@ Deferred indefinitely: linting, formatter, schema validation for sample data.
 ## Conventions for working in this repo
 
 - Test against `samples/gas_prices/` before shipping any preview change. Spot-check both OG and V2 in all four layouts.
+- Release process is documented in `README.md` → "Releasing a new version to the Marketplace". Marketplace publisher is `objectgraph-llc`; PAT is cached locally via `vsce login`.
 - For UI changes, the harness can't run the extension dev host — say so explicitly and ask the user to F5 / reload.
 - When adding device support, scope: TRMNL devices only (og, ogv2, v2). The framework CSS bundles dozens of e-reader variants (kindle, kobo, etc.) — those are out of scope.
