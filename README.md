@@ -22,19 +22,30 @@ A VSCode extension for authoring [TRMNL](https://usetrmnl.com) plugin templates 
 
 ### Mock data file (`sample.json`)
 
-The framework renders against the JSON your polling URL returns at runtime. For local preview, put that same shape in `sample.json` next to your `.liquid` files. Example:
+The framework renders against the JSON your polling URL returns at runtime. For local preview, put that same shape in `sample.json` next to your `.liquid` files. Example (from `samples/gas_prices/sample.json`):
 
 ```json
 {
-  "term": "Fall 2026",
-  "summary": { "enrollment": 14872, "credits": 158204 },
+  "state": "NY",
+  "fetched_at": 1762272000,
   "rows": [
-    { "career": "UGRD", "enrollment": 9120 }
+    { "fuel": "unleaded", "state": 3.42, "national": 3.18, "diff": 0.24, "state_year_ago": 3.61, "national_year_ago": 3.30 },
+    { "fuel": "midgrade", "state": 3.86, "national": 3.62, "diff": 0.24, "state_year_ago": 4.04, "national_year_ago": 3.74 },
+    { "fuel": "premium",  "state": 4.21, "national": 3.97, "diff": 0.24, "state_year_ago": 4.39, "national_year_ago": 4.09 },
+    { "fuel": "diesel",   "state": 3.74, "national": 3.69, "diff": 0.05, "state_year_ago": 3.95, "national_year_ago": 3.86 }
   ],
   "trmnl": {
-    "plugin_settings": { "instance_name": "My Plugin" }
+    "plugin_settings": { "instance_name": "AAA Gas Prices" }
   }
 }
+```
+
+The matching `full.liquid` consumes it like:
+
+```liquid
+{% assign reg = rows | where: "fuel", "unleaded" | first %}
+<span class="value value--xxxlarge value--tnums">${{ reg.state }}</span>
+<span class="label">Regular Unleaded — {{ state }}</span>
 ```
 
 > **Heads up:** `custom_fields.yml` in TRMNL is the *plugin config schema* (asks the user for an API key, dropdown options, etc.) — it isn't the data your template renders against. That data comes from your polling URL.
@@ -48,14 +59,13 @@ The framework renders against the JSON your polling URL returns at runtime. For 
 | `TRMNL: Set Preview Layout` | Override the layout auto-detected from filename |
 | `TRMNL: Toggle Portrait Orientation` | Flip orientation (portrait class is applied) |
 
-## Sample plugins
+## Sample plugin
 
-Two real plugins are vendored under `samples/` for testing and as references:
+A real plugin is vendored under `samples/gas_prices/` as a reference implementation:
 
-- `samples/dashboard/` — LIU enrollment dashboard (multi-row table on the full layout)
-- `samples/gas_prices/` — AAA fuel price tracker (filtered rows via Liquid `where`)
+- AAA fuel price tracker — uses Liquid `where` filters to pick rows by fuel grade, demonstrates responsive value sizing (`value--xxxlarge lg:value--giga`), and ships all four layout files (`full`, `half_horizontal`, `half_vertical`, `quadrant`) plus a `sample.json` matching the upstream API shape.
 
-Each has all four layout files plus a `sample.json` matching the upstream API shape.
+Open the `samples/gas_prices/` folder in VSCode, open any `.liquid` file, and run **TRMNL: Open Preview** to see it render.
 
 ## Development
 
@@ -65,7 +75,7 @@ npm run build           # one-shot esbuild bundle
 npm run watch           # rebuild on change
 ```
 
-Press **F5** in VSCode (with this folder open) to launch the Extension Development Host pre-opened to `samples/dashboard`.
+Press **F5** in VSCode (with this folder open) to launch the Extension Development Host pre-opened to `samples/gas_prices`.
 
 ### Re-vendoring framework CSS
 
@@ -86,4 +96,4 @@ Phase 2 (live preview) is functional. Snippets / IntelliSense and pixel-perfect 
 
 ## License
 
-TBD
+[MIT](LICENSE) © Gavi Narra

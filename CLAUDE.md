@@ -41,11 +41,7 @@ If neither exists, the file renders with `{}` and a warning banner appears in th
     https://trmnl.com/framework/docs/3.1/value.md
   ```
 
-- Real-world example plugins are vendored under `samples/`:
-  - `samples/dashboard/` — LIU enrollment dashboard
-  - `samples/gas_prices/` — AAA fuel price tracker
-
-  Each contains the four layout files (`full`, `half_horizontal`, `half_vertical`, `quadrant`), a `custom_fields.yml` (plugin config schema), and a `sample.json` (mock render context). These are the canonical inputs for smoke-testing the preview.
+- Canonical example plugin is vendored under `samples/gas_prices/` (AAA fuel price tracker). Contains the four layout files (`full`, `half_horizontal`, `half_vertical`, `quadrant`), a `custom_fields.yml` (plugin config schema), and a `sample.json` (mock render context). Use this for smoke-testing any preview change.
 
 ## Phase status
 
@@ -74,6 +70,6 @@ Deferred indefinitely: linting, formatter, schema validation for sample data.
 
 ## Conventions for working in this repo
 
-- Test against the real example plugins in `samples/` before shipping any preview change. Spot-check both OG and V2 in all four layouts.
+- Test against `samples/gas_prices/` before shipping any preview change. Spot-check both OG and V2 in all four layouts.
 - For UI changes, the harness can't run the extension dev host — say so explicitly and ask the user to F5 / reload.
 - When adding device support, scope: TRMNL devices only (og, ogv2, v2). The framework CSS bundles dozens of e-reader variants (kindle, kobo, etc.) — those are out of scope.
