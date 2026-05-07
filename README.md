@@ -102,21 +102,25 @@ Press **F5** in VSCode (with this folder open) to launch the Extension Developme
 
 One-time setup (already done): `npx @vscode/vsce login objectgraph-llc` — paste the Azure DevOps PAT once; vsce caches it.
 
-Each release:
+**Scripted (recommended).** Commit and review your changes first, then:
 
 ```sh
-# 1. Make code changes; test in dev host (F5).
+npm run release            # patch bump (0.1.0 → 0.1.1)
+npm run release minor      # 0.1.x → 0.2.0
+npm run release major      # 0.x.x → 1.0.0
 
-# 2. Bump version (auto-commits and tags):
-npm version patch       # 0.0.1 → 0.0.2 (bug fixes)
-# npm version minor     # 0.0.x → 0.1.0 (new features)
-# npm version major     # 0.x.x → 1.0.0 (breaking)
-
-# 3. Build + publish to Marketplace:
-npx @vscode/vsce publish
-
-# 4. Mirror code + tag to GitHub:
+# Then push the version-bump commit and tag yourself:
 git push && git push --tags
+```
+
+`scripts/release.sh` checks the working tree is clean, prompts for confirmation, runs `npm version`, and publishes to the Marketplace. It does **not** push to GitHub — that's still on you.
+
+**Manual equivalent**, if the script breaks or you want to do it by hand:
+
+```sh
+npm version patch              # bumps + commits + tags locally
+npx @vscode/vsce publish       # uploads to Marketplace
+git push && git push --tags    # mirrors to GitHub
 ```
 
 Listing updates at https://marketplace.visualstudio.com/items?itemName=objectgraph-llc.trmnl-liquid within ~5 minutes.
