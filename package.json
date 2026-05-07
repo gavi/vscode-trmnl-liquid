@@ -2,7 +2,7 @@
   "name": "trmnl-liquid",
   "displayName": "TRMNL Liquid",
   "description": "Live preview for TRMNL plugin Liquid templates — render .liquid files at correct device dimensions with mock data.",
-  "version": "0.0.1",
+  "version": "0.1.0",
   "publisher": "objectgraph-llc",
   "author": {
     "name": "Gavi Narra",
