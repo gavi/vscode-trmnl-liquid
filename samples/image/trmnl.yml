@@ -1,0 +1,12 @@
+# TRMNL Liquid (VSCode extension) — local config.
+#
+# When this file is present next to the .liquid files, the preview toolbar
+# shows a Refresh button. Clicking it fetches polling_url, writes the JSON
+# response to sample.json, and re-renders the preview.
+#
+# Add to .gitignore if your URL or headers contain secrets.
+
+polling_url: https://spandana.com/trmnl/json
+method: GET
+# headers:
+#   X-API-Key: your-secret-here

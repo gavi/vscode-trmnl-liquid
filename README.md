@@ -13,10 +13,10 @@ A VSCode extension for authoring [TRMNL](https://usetrmnl.com) plugin templates 
 - **Live preview** of any `.liquid` file in a webview beside the editor
 - **Device switcher**: TRMNL OG (800×480, 1-bit), TRMNL OG V2 (800×480, 2-bit), TRMNL X / V2 (1040×780, 4-bit)
 - **Layout switcher**: `full`, `half_horizontal`, `half_vertical`, `quadrant`. Auto-detected from filename, manually overridable.
-- **Portrait toggle** for TRMNL X
 - **Mashup slot visualization** — half/quadrant layouts show the rendered slot in context with empty-slot placeholders for the rest of the device
 - **Auto-fit** — scales to fit the pane width, percentage shown in the toolbar
 - **Auto-refresh** on save of the `.liquid` file or its sibling `sample.json`
+- **Live polling** — drop a `trmnl.yml` next to your templates with the polling URL, click ↻ Refresh in the toolbar to fetch real data into memory
 - Liquid rendered via [LiquidJS](https://liquidjs.com/) (Shopify-flavored)
 
 ## Usage
@@ -24,7 +24,7 @@ A VSCode extension for authoring [TRMNL](https://usetrmnl.com) plugin templates 
 1. Open a directory containing your `.liquid` files (`full.liquid`, `quadrant.liquid`, etc.).
 2. Add a `sample.json` (or `sample.yml`) next to the layout files with mock render data — its keys become the top-level Liquid context.
 3. Open one of the `.liquid` files and run **TRMNL: Open Preview** from the command palette (`Cmd+Shift+P`).
-4. Use the toolbar at the top of the preview to switch device, layout, or portrait orientation.
+4. Use the toolbar at the top of the preview to switch device or layout.
 
 ### Mock data file (`sample.json`)
 
@@ -56,6 +56,21 @@ The matching `full.liquid` consumes it like:
 
 > **Heads up:** `custom_fields.yml` in TRMNL is the *plugin config schema* (asks the user for an API key, dropdown options, etc.) — it isn't the data your template renders against. That data comes from your polling URL.
 
+### Live polling (`trmnl.yml`)
+
+If your plugin polls a real URL and you'd rather render against live data than maintain a `sample.json`, drop a `trmnl.yml` next to the `.liquid` files:
+
+```yaml
+polling_url: https://api.example.com/data
+method: GET             # optional, default GET
+headers:                # optional
+  X-API-Key: your-secret
+```
+
+When the preview opens, the extension fetches the URL and renders against the response **in memory** — `sample.json` is never written to and remains your offline fallback. A **↻ Refresh** button appears in the toolbar; clicking it re-fetches.
+
+> If your URL or headers contain secrets, add `trmnl.yml` to `.gitignore`.
+
 ## Commands
 
 | Command | Description |
@@ -63,15 +78,15 @@ The matching `full.liquid` consumes it like:
 | `TRMNL: Open Preview` | Open the preview pane for the active `.liquid` file |
 | `TRMNL: Set Preview Device` | Switch between OG / OG V2 / X (also available in toolbar) |
 | `TRMNL: Set Preview Layout` | Override the layout auto-detected from filename |
-| `TRMNL: Toggle Portrait Orientation` | Flip orientation (portrait class is applied) |
 
-## Sample plugin
+## Sample plugins
 
-A real plugin is vendored under `samples/gas_prices/` as a reference implementation:
+Two real plugins are vendored under `samples/` as reference implementations:
 
-- AAA fuel price tracker — uses Liquid `where` filters to pick rows by fuel grade, demonstrates responsive value sizing (`value--xxxlarge lg:value--giga`), and ships all four layout files (`full`, `half_horizontal`, `half_vertical`, `quadrant`) plus a `sample.json` matching the upstream API shape.
+- `samples/image/` — random-image plugin with a `trmnl.yml` pointing at a live polling URL. Demonstrates the **Refresh** flow.
+- `samples/gas_prices/` — AAA fuel price tracker. Uses Liquid `where` filters and responsive value sizing (`value--xxxlarge lg:value--giga`). Pure `sample.json`, no live fetch.
 
-Open the `samples/gas_prices/` folder in VSCode, open any `.liquid` file, and run **TRMNL: Open Preview** to see it render.
+Each ships all four layout files (`full`, `half_horizontal`, `half_vertical`, `quadrant`). Open any of those folders in VSCode, open a `.liquid` file, and click the eye icon in the editor title to preview.
 
 ## Development
 
@@ -81,7 +96,7 @@ npm run build           # one-shot esbuild bundle
 npm run watch           # rebuild on change
 ```
 
-Press **F5** in VSCode (with this folder open) to launch the Extension Development Host pre-opened to `samples/gas_prices`.
+Press **F5** in VSCode (with this folder open) to launch the Extension Development Host pre-opened to `samples/image` (live polling demo). Edit `.vscode/launch.json` to switch to a different sample.
 
 ### Releasing a new version to the Marketplace
 

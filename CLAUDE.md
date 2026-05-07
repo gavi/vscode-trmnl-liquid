@@ -15,18 +15,28 @@ Three TRMNL devices and combinations of size + orientation + mashup slot:
 
 - **TRMNL OG** — 800×480, 1-bit (`screen--og` + `screen--1bit`)
 - **TRMNL OG V2** — 800×480, 2-bit grayscale (`screen--ogv2` + `screen--2bit`)
-- **TRMNL X / V2** — 1040×780, 4-bit grayscale (`screen--v2` + `screen--4bit`), supports portrait
+- **TRMNL X / V2** — 1040×780, 4-bit grayscale (`screen--v2` + `screen--4bit`)
 
 Layouts per file: `full`, `half_horizontal`, `half_vertical`, `quadrant`. Combined with bit depth and orientation there are ~10 meaningful preview targets.
 
 ## Mock data convention
 
-`.liquid` files are rendered against context loaded from a sibling file, in this priority order:
+`.liquid` files are rendered against context loaded in this priority order:
 
-1. `sample.json` — JSON object becomes the Liquid context (preferred)
-2. `sample.yml` — YAML alternative
+1. **Live data from `trmnl.yml`** — if a sibling `trmnl.yml` exists with `polling_url:`, the extension auto-fetches on preview open and stores the response in memory. The toolbar shows a ↻ Refresh button to re-fetch. `sample.json` is never written to.
+2. `sample.json` — JSON object becomes the Liquid context (offline fallback)
+3. `sample.yml` — YAML alternative
 
-If neither exists, the file renders with `{}` and a warning banner appears in the preview.
+If none exist, the file renders with `{}` and a warning banner appears.
+
+`trmnl.yml` shape:
+```yaml
+polling_url: https://api.example.com/data
+method: GET             # optional
+headers:                # optional
+  X-API-Key: secret
+```
+Recommend gitignoring `trmnl.yml` when it carries secrets.
 
 **Note:** `custom_fields.yml` in TRMNL plugin terminology is the *plugin config schema* (API key, author bio, dropdown options) — **not** the runtime render data. The runtime data comes from the polling URL response. The two vendored samples include both files: `custom_fields.yml` (for reference / parity with the upstream plugin) and `sample.json` (for preview rendering).
 
@@ -41,12 +51,14 @@ If neither exists, the file renders with `{}` and a warning banner appears in th
     https://trmnl.com/framework/docs/3.1/value.md
   ```
 
-- Canonical example plugin is vendored under `samples/gas_prices/` (AAA fuel price tracker). Contains the four layout files (`full`, `half_horizontal`, `half_vertical`, `quadrant`), a `custom_fields.yml` (plugin config schema), and a `sample.json` (mock render context). Use this for smoke-testing any preview change.
+- Two example plugins under `samples/`:
+  - `samples/image/` — random-image plugin with a sibling `trmnl.yml` pointing at `https://spandana.com/trmnl/json`. Smoke-tests the live polling/Refresh flow. F5 launches this by default.
+  - `samples/gas_prices/` — AAA fuel price tracker, pure `sample.json` (no live fetch). Smoke-tests the offline path with `where` filters and responsive value sizing.
 
 ## Phase status
 
 - **Phase 1 — Snippets + IntelliSense.** Deferred. The user prioritized preview over authoring assist.
-- **Phase 2 — Webview preview.** ✅ Shipped. Toolbar UI for device / layout / portrait switching, sample.json mock data injection, vendored framework CSS, fit-to-pane scaling, mashup slot visualization for half/quadrant layouts.
+- **Phase 2 — Webview preview.** ✅ Shipped. Toolbar UI for device / layout switching, sample.json mock data injection, vendored framework CSS, fit-to-pane scaling, mashup slot visualization for half/quadrant layouts.
 - **Phase 3 — Refinements.** Open: 1-bit dithering pass for non-framework content, more sample plugins, pixel-perfect parity audit vs. real device output.
 
 Deferred indefinitely: linting, formatter, schema validation for sample data.

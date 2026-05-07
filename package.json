@@ -50,11 +50,6 @@
         "command": "trmnl.setDevice",
         "title": "TRMNL: Set Preview Device",
         "category": "TRMNL"
-      },
-      {
-        "command": "trmnl.togglePortrait",
-        "title": "TRMNL: Toggle Portrait Orientation",
-        "category": "TRMNL"
       }
     ],
     "menus": {

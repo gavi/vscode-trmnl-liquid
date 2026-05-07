@@ -1,0 +1,15 @@
+# TRMNL Private Plugin → Custom Fields
+# Paste this into the "Custom Fields" YAML section in the plugin editor.
+# Then set the Polling URL to:
+#   https://spandana.com/trmnl/json
+
+- keyname: about
+  name: About This Plugin
+  field_type: author_bio
+  category: lifestyle
+  description: |
+    Displays a random image whose URL is returned by
+    https://spandana.com/trmnl/json on every poll. The endpoint returns JSON
+    of the form:
+      { "image_url": "https://...", "caption": "optional text" }
+  email_address: gavi.narra@objectgraph.com

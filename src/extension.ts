@@ -29,7 +29,15 @@ type Preview = {
   fileUri: vscode.Uri;
   layoutOverride?: Layout;
   deviceId: DeviceId;
-  portrait: boolean;
+  liveData?: Record<string, unknown>;
+  lastFetchedAt?: number;
+  lastFetchError?: string;
+};
+
+type PollingConfig = {
+  polling_url: string;
+  method?: string;
+  headers?: Record<string, string>;
 };
 
 const previews = new Map<string, Preview>();
@@ -83,18 +91,6 @@ export function activate(context: vscode.ExtensionContext) {
       );
       if (!pick) return;
       preview.deviceId = pick.deviceId as DeviceId;
-      await refresh(context, preview);
-    })
-  );
-
-  context.subscriptions.push(
-    vscode.commands.registerCommand("trmnl.togglePortrait", async () => {
-      const preview = activePreview;
-      if (!preview) {
-        vscode.window.showWarningMessage("TRMNL preview: open a preview first.");
-        return;
-      }
-      preview.portrait = !preview.portrait;
       await refresh(context, preview);
     })
   );
@@ -158,7 +154,6 @@ async function openOrFocusPreview(
     fileUri: doc.uri,
     layoutOverride: undefined,
     deviceId: "og",
-    portrait: false,
   };
   previews.set(key, preview);
   activePreview = preview;
@@ -180,13 +175,16 @@ async function openOrFocusPreview(
     } else if (msg.type === "setLayout") {
       preview.layoutOverride = msg.value === "auto" ? undefined : (msg.value as Layout);
       dirty = true;
-    } else if (msg.type === "setPortrait") {
-      preview.portrait = !!msg.value;
+    } else if (msg.type === "refreshData") {
+      await fetchLive(preview);
       dirty = true;
     }
     if (dirty) await refresh(context, preview);
   });
 
+  if (loadPollingConfig(path.dirname(doc.uri.fsPath))) {
+    await fetchLive(preview);
+  }
   await refresh(context, preview);
 }
 
@@ -211,8 +209,13 @@ async function renderHtml(
   const dir = path.dirname(doc.uri.fsPath);
   const liquidSrc = doc.getText();
   const layout = preview.layoutOverride ?? detectLayout(doc.uri.fsPath);
+  const pollingConfig = loadPollingConfig(dir);
 
-  const ctx = await loadContext(dir);
+  const ctx: LoadedContext = preview.liveData
+    ? { data: preview.liveData, warning: null }
+    : pollingConfig
+      ? { data: {}, warning: "Live data not yet fetched. Click Refresh." }
+      : await loadContext(dir);
 
   let bodyHtml: string;
   let renderError: string | null = null;
@@ -236,15 +239,25 @@ async function renderHtml(
     `script-src 'nonce-${nonce}'`,
   ].join("; ");
 
-  const banner = renderError
+  const fetchErrorBanner = preview.lastFetchError
+    ? `<div class="trmnl-preview-error">Fetch error: ${escapeHtml(preview.lastFetchError)}</div>`
+    : "";
+  const banner = (renderError
     ? `<div class="trmnl-preview-error">Liquid render error: ${escapeHtml(renderError)}</div>`
     : ctx.warning
       ? `<div class="trmnl-preview-warning">${escapeHtml(ctx.warning)}</div>`
-      : "";
+      : "") + fetchErrorBanner;
+
+  const refreshButton = pollingConfig
+    ? `<button id="refresh" type="button" title="Fetch ${escapeHtml(pollingConfig.polling_url)}">↻ Refresh</button>`
+    : "";
+  const fetchedReadout = preview.lastFetchedAt
+    ? ` · fetched ${formatRelativeTime(preview.lastFetchedAt)}`
+    : "";
 
   const device = DEVICES.find((d) => d.id === preview.deviceId)!;
-  const screenClasses = buildScreenClasses(device, preview.portrait);
-  const [renderedW, renderedH] = preview.portrait ? [device.h, device.w] : [device.w, device.h];
+  const screenClasses = buildScreenClasses(device);
+  const [renderedW, renderedH] = [device.w, device.h];
   const detected = detectLayout(doc.uri.fsPath);
 
   const deviceOptions = DEVICES.map(
@@ -291,7 +304,12 @@ async function renderHtml(
       border-radius: 4px; padding: 3px 6px; font-size: 12px;
       font-family: inherit;
     }
-    .trmnl-toolbar input[type="checkbox"] { accent-color: #4a90e2; }
+    .trmnl-toolbar button {
+      background: #2a2a2a; color: #eaeaea; border: 1px solid #444;
+      border-radius: 4px; padding: 3px 8px; font-size: 12px;
+      font-family: inherit; cursor: pointer;
+    }
+    .trmnl-toolbar button:hover { background: #333; border-color: #555; }
     .trmnl-toolbar .meta { margin-left: auto; color: #888; font-family: ui-monospace, monospace; }
     .trmnl-preview-stage {
       width: 100%;
@@ -338,8 +356,8 @@ async function renderHtml(
   <div class="trmnl-toolbar">
     <label>Device <select id="device">${deviceOptions}</select></label>
     <label>Layout <select id="layout">${layoutOptions}</select></label>
-    <label><input type="checkbox" id="portrait"${preview.portrait ? " checked" : ""}> Portrait</label>
-    <span class="meta" id="meta">${renderedW}×${renderedH} · ${device.bitDepth}-bit</span>
+    ${refreshButton}
+    <span class="meta" id="meta">${renderedW}×${renderedH} · ${device.bitDepth}-bit${fetchedReadout}</span>
   </div>
   ${banner}
   <div class="trmnl-preview-stage">
@@ -355,10 +373,11 @@ async function renderHtml(
     const meta = document.getElementById("meta");
 
     const stage = document.querySelector(".trmnl-preview-stage");
+    const fetchedSuffix = ${JSON.stringify(fetchedReadout)};
     function fit() {
       const stageW = stage.getBoundingClientRect().width;
       const scale = Math.min(1, stageW / W);
-      meta.textContent = W + "×" + H + " · ${device.bitDepth}-bit · " + Math.round(scale * 100) + "%";
+      meta.textContent = W + "×" + H + " · ${device.bitDepth}-bit · " + Math.round(scale * 100) + "%" + fetchedSuffix;
     }
     fit();
     new ResizeObserver(fit).observe(stage);
@@ -369,9 +388,14 @@ async function renderHtml(
     document.getElementById("layout").addEventListener("change", (e) => {
       vscode.postMessage({ type: "setLayout", value: e.target.value });
     });
-    document.getElementById("portrait").addEventListener("change", (e) => {
-      vscode.postMessage({ type: "setPortrait", value: e.target.checked });
-    });
+    const refreshBtn = document.getElementById("refresh");
+    if (refreshBtn) {
+      refreshBtn.addEventListener("click", () => {
+        refreshBtn.disabled = true;
+        refreshBtn.textContent = "↻ Fetching…";
+        vscode.postMessage({ type: "refreshData" });
+      });
+    }
   </script>
 </body>
 </html>`;
@@ -407,21 +431,17 @@ function randomNonce(): string {
   return s;
 }
 
-function buildScreenClasses(device: Device, portrait: boolean): string {
-  const w = portrait ? device.h : device.w;
+function buildScreenClasses(device: Device): string {
   const sizes: string[] = [];
-  if (w >= 600)  sizes.push("screen--sm");
-  if (w >= 800)  sizes.push("screen--md");
-  if (w >= 1024) sizes.push("screen--lg");
+  if (device.w >= 600)  sizes.push("screen--sm");
+  if (device.w >= 800)  sizes.push("screen--md");
+  if (device.w >= 1024) sizes.push("screen--lg");
   return [
     "screen",
     device.screenClass,
     `screen--${device.bitDepth}bit`,
     ...sizes,
-    portrait ? "screen--portrait" : "",
-  ]
-    .filter(Boolean)
-    .join(" ");
+  ].join(" ");
 }
 
 function detectLayout(filePath: string): Layout {
@@ -431,6 +451,48 @@ function detectLayout(filePath: string): Layout {
 }
 
 type LoadedContext = { data: Record<string, unknown>; warning: string | null };
+
+function loadPollingConfig(dir: string): PollingConfig | null {
+  const p = path.join(dir, "trmnl.yml");
+  if (!fs.existsSync(p)) return null;
+  try {
+    const cfg = yaml.load(fs.readFileSync(p, "utf8")) as PollingConfig;
+    if (!cfg || typeof cfg.polling_url !== "string") return null;
+    return cfg;
+  } catch {
+    return null;
+  }
+}
+
+async function fetchLive(preview: Preview): Promise<void> {
+  const dir = path.dirname(preview.fileUri.fsPath);
+  const config = loadPollingConfig(dir);
+  if (!config) {
+    preview.lastFetchError = "No trmnl.yml with polling_url found.";
+    return;
+  }
+  try {
+    const res = await fetch(config.polling_url, {
+      method: config.method ?? "GET",
+      headers: config.headers ?? {},
+    });
+    if (!res.ok) {
+      preview.lastFetchError = `HTTP ${res.status} ${res.statusText}`;
+      return;
+    }
+    const text = await res.text();
+    try {
+      preview.liveData = JSON.parse(text);
+    } catch (e: any) {
+      preview.lastFetchError = `Response is not JSON: ${e.message}`;
+      return;
+    }
+    preview.lastFetchedAt = Date.now();
+    preview.lastFetchError = undefined;
+  } catch (e: any) {
+    preview.lastFetchError = e?.message ?? String(e);
+  }
+}
 
 async function loadContext(dir: string): Promise<LoadedContext> {
   const samplePath = path.join(dir, "sample.json");
@@ -455,6 +517,15 @@ async function loadContext(dir: string): Promise<LoadedContext> {
     data: {},
     warning: "No sample.json (or sample.yml) found next to this file. Rendering with empty context.",
   };
+}
+
+function formatRelativeTime(ts: number): string {
+  const sec = Math.max(1, Math.round((Date.now() - ts) / 1000));
+  if (sec < 60) return `${sec}s ago`;
+  const min = Math.round(sec / 60);
+  if (min < 60) return `${min}m ago`;
+  const hr = Math.round(min / 60);
+  return `${hr}h ago`;
 }
 
 function escapeHtml(s: string): string {
