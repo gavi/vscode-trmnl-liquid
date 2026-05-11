@@ -71,6 +71,33 @@ Deferred indefinitely: linting, formatter, schema validation for sample data.
 - Vendored `media/plugins.css` from `https://usetrmnl.com/css/latest/plugins.css`. Asset URLs inside it are rewritten from `usetrmnl.com` → `trmnl.com` to skip the 301 redirect that breaks webview CSP. If you re-vendor, re-run the rewrite.
 - esbuild for bundling
 
+## Release process
+
+Marketplace publisher is `objectgraph-llc`; the PAT is cached locally by `vsce` in the system keychain (one-time `npx @vscode/vsce login objectgraph-llc`). Future contributors with publish rights need their own PAT.
+
+**Scripted** (commit + review your changes first, then):
+
+```sh
+npm run release            # patch bump (e.g. 0.1.0 → 0.1.1)
+npm run release minor      # 0.1.x → 0.2.0 (new feature)
+npm run release major      # 0.x.x → 1.0.0 (breaking)
+git push && git push --tags
+```
+
+`scripts/release.sh` refuses to run on a dirty tree, prompts for confirmation, runs `npm version <bump>` (which auto-commits and tags), then `vsce publish`. It does **not** push to GitHub — push the version-bump commit and tag yourself afterward.
+
+**Manual equivalent** if the script breaks:
+
+```sh
+npm version patch              # bumps + commits + tags
+npx @vscode/vsce publish       # uploads to Marketplace
+git push && git push --tags
+```
+
+Listing updates at https://marketplace.visualstudio.com/items?itemName=objectgraph-llc.trmnl-liquid within ~5 min.
+
+**Open VSX** (used by Cursor / VSCodium / Windsurf) is a separate registry — not currently shipped to. If we ever do, get a token at https://open-vsx.org/user-settings/tokens and `npx ovsx publish *.vsix -p <token>`.
+
 ## Preview gotchas (load-bearing — don't undo without understanding)
 
 - **`--pixel-ratio` override.** The framework's `.trmnl .screen` rule applies `transform: scale(var(--pixel-ratio))` to the screen element. On TRMNL X (`--pixel-ratio: 1.8`) this visually upscales everything ~1.8× linearly. We override `--pixel-ratio: 1` on the preview's `.screen` so the device renders at native 1:1 in the pane. Three uses in the bundled CSS, all in the same rule (transform + matching margin reservations) — re-grep `var(--pixel-ratio)` if upgrading the framework.
@@ -83,6 +110,5 @@ Deferred indefinitely: linting, formatter, schema validation for sample data.
 ## Conventions for working in this repo
 
 - Test against `samples/gas_prices/` before shipping any preview change. Spot-check both OG and V2 in all four layouts.
-- Release process is documented in `README.md` → "Releasing a new version to the Marketplace". Marketplace publisher is `objectgraph-llc`; PAT is cached locally via `vsce login`.
 - For UI changes, the harness can't run the extension dev host — say so explicitly and ask the user to F5 / reload.
 - When adding device support, scope: TRMNL devices only (og, ogv2, v2). The framework CSS bundles dozens of e-reader variants (kindle, kobo, etc.) — those are out of scope.

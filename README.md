@@ -1,7 +1,5 @@
 # TRMNL Liquid
 
-[![VS Marketplace Version](https://img.shields.io/visual-studio-marketplace/v/objectgraph-llc.trmnl-liquid?label=VS%20Marketplace)](https://marketplace.visualstudio.com/items?itemName=objectgraph-llc.trmnl-liquid)
-[![VS Marketplace Installs](https://img.shields.io/visual-studio-marketplace/i/objectgraph-llc.trmnl-liquid)](https://marketplace.visualstudio.com/items?itemName=objectgraph-llc.trmnl-liquid)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 
 A VSCode extension for authoring [TRMNL](https://usetrmnl.com) plugin templates locally — render `.liquid` files with mock data in a live webview at the right device dimensions, instead of round-tripping through the web editor.
@@ -98,40 +96,9 @@ npm run watch           # rebuild on change
 
 Press **F5** in VSCode (with this folder open) to launch the Extension Development Host pre-opened to `samples/image` (live polling demo). Edit `.vscode/launch.json` to switch to a different sample.
 
-### Releasing a new version to the Marketplace
+### Releasing
 
-One-time setup (already done): `npx @vscode/vsce login objectgraph-llc` — paste the Azure DevOps PAT once; vsce caches it.
-
-**Scripted (recommended).** Commit and review your changes first, then:
-
-```sh
-npm run release            # patch bump (0.1.0 → 0.1.1)
-npm run release minor      # 0.1.x → 0.2.0
-npm run release major      # 0.x.x → 1.0.0
-
-# Then push the version-bump commit and tag yourself:
-git push && git push --tags
-```
-
-`scripts/release.sh` checks the working tree is clean, prompts for confirmation, runs `npm version`, and publishes to the Marketplace. It does **not** push to GitHub — that's still on you.
-
-**Manual equivalent**, if the script breaks or you want to do it by hand:
-
-```sh
-npm version patch              # bumps + commits + tags locally
-npx @vscode/vsce publish       # uploads to Marketplace
-git push && git push --tags    # mirrors to GitHub
-```
-
-Listing updates at https://marketplace.visualstudio.com/items?itemName=objectgraph-llc.trmnl-liquid within ~5 minutes.
-
-To ship to **Open VSX** (used by Cursor / VSCodium / Windsurf) too — first time, get a token at https://open-vsx.org/user-settings/tokens, then:
-
-```sh
-npx ovsx publish trmnl-liquid-<version>.vsix -p <open-vsx-token>
-```
-
-(You can omit Open VSX entirely; users on those editors can still sideload by downloading the `.vsix` from GitHub releases.)
+Maintainer-only. See `CLAUDE.md` → "Release process", or use `npm run release [patch|minor|major]`.
 
 ### Re-vendoring framework CSS
 
